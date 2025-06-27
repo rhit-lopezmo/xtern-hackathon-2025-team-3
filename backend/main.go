@@ -30,21 +30,27 @@ type openAIResponse struct {
 	} `json:"choices"`
 }
 
+type recipe struct {
+	Title       string   `json:"title"`
+	InspiredBy  string   `json:"inspired_by"`
+	Ingredients []string `json:"ingredients"`
+	Steps       []string `json:"steps"`
+}
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
 	router := gin.Default()
+	router.Static("/", "../frontend")
 	router.POST("/chat", handleChat)
 
-	// Create server instance for graceful shutdown
 	server := &http.Server{
 		Addr:    "localhost:8080",
 		Handler: router,
 	}
 
-	// Start server in background
 	go func() {
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatal("Failed to start server:", err)
@@ -52,7 +58,6 @@ func main() {
 	}()
 	log.Println("Server started on http://localhost:8080")
 
-	// Graceful shutdown on Ctrl+C or SIGTERM
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
@@ -85,15 +90,32 @@ func handleChat(c *gin.Context) {
 		"model": "gpt-4-1106-preview",
 		"messages": []map[string]string{
 			{
-				"role":    "system",
-				"content": "You are a friendly, concise programming assistant who explains concepts with examples when helpful.",
+				"role": "system",
+				"content": `You are a friendly, confident home cooking assistant helping elderly users in Indiana recreate meals inspired by local restaurants and international cuisines.
+
+Users will describe the kind of food they want. Your job is to generate a list of 3–5 recipes that match, inspired by popular Indiana restaurants or international cuisines (e.g. Hacienda, Pizza King, Thai, Indian).
+
+ALWAYS return a JSON array of recipe objects using this format:
+[
+  {
+    "title": "Dish name",
+    "inspired_by": "Restaurant or cuisine + dish name",
+    "ingredients": ["List of ingredients"],
+    "steps": ["Step-by-step instructions"]
+  },
+  ...
+]
+
+NEVER return just one object. NEVER leave any fields blank or null. If unsure, make a best guess.
+
+Only return valid JSON. Do not wrap in markdown. Do not explain. Output just the array.`,
 			},
 			{
 				"role":    "user",
 				"content": input.Prompt,
 			},
 		},
-		"max_tokens":  100,
+		"max_tokens":  1000,
 		"temperature": 0.7,
 	}
 
@@ -126,16 +148,22 @@ func handleChat(c *gin.Context) {
 	}
 
 	var aiResp openAIResponse
-	if err := json.Unmarshal(body, &aiResp); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse OpenAI response"})
-		return
-	}
-	if len(aiResp.Choices) == 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "no response from OpenAI"})
+	if err := json.Unmarshal(body, &aiResp); err != nil || len(aiResp.Choices) == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse OpenAI wrapper"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"response": aiResp.Choices[0].Message.Content,
-	})
+	// Parse the JSON string inside assistant's message.content as an array
+	content := aiResp.Choices[0].Message.Content
+	var parsed []recipe
+	if err := json.Unmarshal([]byte(content), &parsed); err != nil {
+		log.Println("Failed to parse recipe list:", err)
+		c.JSON(http.StatusOK, gin.H{
+			"raw":   content,
+			"error": "Response was not valid recipe list JSON",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, parsed)
 }
