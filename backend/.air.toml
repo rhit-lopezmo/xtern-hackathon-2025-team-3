@@ -1,0 +1,14 @@
+# backend/.air.toml
+
+[build]
+cmd = "go run ."
+bin = "tmp/main"
+delay = 1000
+include_ext = ["go", "html", "js", "css"]   # Watch JS, HTML, CSS
+exclude_dir = ["tmp", "vendor"]
+
+# Watch frontend directory explicitly
+include_dir = ["./", "../frontend"]
+
+[log]
+time = true
