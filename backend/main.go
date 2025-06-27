@@ -2,11 +2,16 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -32,9 +37,35 @@ func main() {
 
 	router := gin.Default()
 	router.POST("/chat", handleChat)
-	if err := router.Run("localhost:8080"); err != nil {
-		log.Fatal("Failed to start server:", err)
+
+	// Create server instance for graceful shutdown
+	server := &http.Server{
+		Addr:    "localhost:8080",
+		Handler: router,
 	}
+
+	// Start server in background
+	go func() {
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal("Failed to start server:", err)
+		}
+	}()
+	log.Println("Server started on http://localhost:8080")
+
+	// Graceful shutdown on Ctrl+C or SIGTERM
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
+	}
+
+	log.Println("Server exited cleanly")
 }
 
 func handleChat(c *gin.Context) {
