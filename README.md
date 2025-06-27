@@ -11,3 +11,5 @@
 1) Copy the .example-env file and rename it to .env
 2) In the .env file, set the OPENAI_API_KEY to your api key
 3) run `make start` in your terminal
+
+The server will now be running locally @ `http://localhost:8080`
