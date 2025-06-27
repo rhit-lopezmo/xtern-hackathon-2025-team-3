@@ -9,6 +9,8 @@
 - must have Go v1.24.4 or greater installed on your system (probably could be lower since it's pretty backwards compatible)
   - https://go.dev/doc/install
 
+NOTE: if you are running on Windows we recommend you run this in WSL
+
 ### To run:
 1) Copy the `.example-env` file in `backend/` and rename it to `.env`
 2) In the `.env` file, set the `OPENAI_API_KEY` to your api key
