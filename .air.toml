@@ -1,0 +1,11 @@
+# .air.toml
+[build]
+  cmd = "go run ."
+  bin = "tmp/main"  # Not used when using go run, but still needed
+  delay = 1000      # Delay in ms
+  include_ext = ["go", "html", "js", "css"]
+  exclude_dir = ["node_modules", "dist"]
+
+[log]
+  time = true
+
