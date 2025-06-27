@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HoosierEats</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+<!-- Header -->
+<header class="bg-white shadow-md py-4 px-6 md:px-12 sticky top-0 z-50 flex items-center justify-between">
+  <div class="flex items-center gap-2 text-2xl font-bold text-[#c85a5a]">
+    <img src="https://placehold.co/40x40?text=Logo" alt="HoosierEats Logo" class="w-10 h-10 rounded-full" />
+    HoosierEats
+  </div>
+  <nav class="flex gap-6">
+    <a href="index.html" class="text-lg font-medium text-gray-700 hover:text-[#a34949]">Home</a>
+    <a href="index.html" class="text-lg font-medium text-gray-700 hover:text-[#a34949]">Sue</a>
+    <a href="tools_conversion_page.html" class="text-lg font-medium text-gray-700 hover:text-[#a34949]">Tools</a>
+    <a href="#" class="text-lg font-medium text-gray-700 hover:text-[#a34949]">Restaurants</a>
+    <a href="#" class="text-lg font-medium text-[#c85a5a] font-bold">Settings</a>
+  </nav>
+</header>
+
+<!-- Settings Form -->
+<main class="flex-grow container mx-auto p-4 md:p-8">
+  <section class="bg-gradient-to-r from-[#c85a5a] to-[#a34949] text-white p-8 rounded-xl shadow-lg mb-8 text-center">
+    <h1 class="text-4xl font-extrabold mb-2">Personal Settings</h1>
+    <p class="text-lg">Customize your experience based on your preferences</p>
+  </section>
+
+  <form class="bg-white p-8 rounded-xl shadow-lg max-w-3xl mx-auto space-y-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label for="dietary" class="block text-md font-semibold text-gray-700 mb-1">Dietary Restrictions</label>
+        <select id="dietary" class="w-full p-3 border border-gray-300 rounded-md">
+          <option value="">Select a dietary restriction</option>
+          <option value="vegetarian">Vegetarian</option>
+          <option value="vegan">Vegan</option>
+          <option value="halal">Halal</option>
+          <option value="kosher">Kosher</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="lifestyle" class="block text-md font-semibold text-gray-700 mb-1">Lifestyle Preferences</label>
+        <select id="lifestyle" class="w-full p-3 border border-gray-300 rounded-md">
+          <option value="">Select a lifestyle preference</option>
+          <option value="low-carb">Low Carb</option>
+          <option value="high-protein">High Protein</option>
+          <option value="keto">Keto</option>
+          <option value="paleo">Paleo</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="allergies" class="block text-md font-semibold text-gray-700 mb-1">Allergies</label>
+        <select id="allergies" class="w-full p-3 border border-gray-300 rounded-md">
+          <option value="">Select an allergy</option>
+          <option value="peanuts">Peanuts</option>
+          <option value="dairy">Dairy</option>
+          <option value="gluten">Gluten</option>
+          <option value="shellfish">Shellfish</option>
+          <option value="soy">Soy</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="health" class="block text-md font-semibold text-gray-700 mb-1">Health Conditions</label>
+        <select id="health" class="w-full p-3 border border-gray-300 rounded-md">
+          <option value="">Select a condition</option>
+          <option value="high-blood-pressure">High Blood Pressure</option>
+          <option value="diabetes">Diabetes</option>
+          <option value="heart-disease">Heart Disease</option>
+          <option value="cholesterol">High Cholesterol</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="bg-[#c85a5a] text-white px-8 py-3 rounded-md hover:bg-[#a34949] font-semibold text-lg shadow-md">Save Settings</button>
+    </div>
+  </form>
+</main>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-6 text-center text-lg">
+  <p>&copy; 2024 HoosierEats. Your preferences, your plate.</p>
+</footer>
+</body>
+</html>
