@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -33,6 +34,7 @@ type openAIResponse struct {
 type recipe struct {
 	Title       string   `json:"title"`
 	InspiredBy  string   `json:"inspired_by"`
+	PrepTime    string   `json:"prep_time"`
 	Ingredients []string `json:"ingredients"`
 	Steps       []string `json:"steps"`
 }
@@ -100,6 +102,7 @@ ALWAYS return a JSON array of recipe objects using this format:
   {
     "title": "Dish name",
     "inspired_by": "Restaurant or cuisine + dish name",
+	"prep_time": "Estimated Prep Time: Number of minutes (in minutes)",
     "ingredients": ["List of ingredients"],
     "steps": ["Step-by-step instructions"]
   },
@@ -107,7 +110,9 @@ ALWAYS return a JSON array of recipe objects using this format:
 ]
 
 NEVER return just one object. NEVER leave any fields blank or null. If unsure, make a best guess.
-
+**Limit your total JSON output to around 3000 tokens.**
+**If needed, reduce the number of recipes or shorten the ingredients/steps.**
+NEVER USE MARKDOWN. ONLY JSON FORMAT.
 Only return valid JSON. Do not wrap in markdown. Do not explain. Output just the array.`,
 			},
 			{
@@ -115,7 +120,7 @@ Only return valid JSON. Do not wrap in markdown. Do not explain. Output just the
 				"content": input.Prompt,
 			},
 		},
-		"max_tokens":  1000,
+		"max_tokens":  3000,
 		"temperature": 0.7,
 	}
 
@@ -153,17 +158,36 @@ Only return valid JSON. Do not wrap in markdown. Do not explain. Output just the
 		return
 	}
 
-	// Parse the JSON string inside assistant's message.content as an array
 	content := aiResp.Choices[0].Message.Content
 	var parsed []recipe
-	if err := json.Unmarshal([]byte(content), &parsed); err != nil {
-		log.Println("Failed to parse recipe list:", err)
-		c.JSON(http.StatusOK, gin.H{
-			"raw":   content,
-			"error": "Response was not valid recipe list JSON",
-		})
-		return
+	err = json.Unmarshal([]byte(content), &parsed)
+	if err != nil {
+		// fallback: try stripping markdown formatting
+		stripped := stripMarkdownJSON(content)
+		err2 := json.Unmarshal([]byte(stripped), &parsed)
+		if err2 != nil {
+			log.Println("Failed to parse recipe list after cleanup:", err2)
+			c.JSON(http.StatusOK, gin.H{
+				"raw":   content,
+				"error": "Response was not valid recipe list JSON",
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, parsed)
+}
+
+func stripMarkdownJSON(input string) string {
+	input = strings.TrimSpace(input)
+	if strings.HasPrefix(input, "```json") {
+		input = strings.TrimPrefix(input, "```json")
+	}
+	if strings.HasPrefix(input, "```") {
+		input = strings.TrimPrefix(input, "```")
+	}
+	if strings.HasSuffix(input, "```") {
+		input = strings.TrimSuffix(input, "```")
+	}
+	return strings.TrimSpace(input)
 }
