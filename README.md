@@ -5,7 +5,9 @@
 
 ### Prerequisites:
 - must have Node v22.16.0 or greater installed on your system
+  - https://nodejs.org/en/download/
 - must have Go v1.24.4 or greater installed on your system (probably could be lower since it's pretty backwards compatible)
+  - https://go.dev/doc/install
 
 ### To run:
 1) Copy the `.example-env` file in `backend/` and rename it to `.env`
